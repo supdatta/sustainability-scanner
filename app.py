@@ -11,7 +11,7 @@ app = Flask(__name__)
 CORS(app)
 
 # Load model
-model = torch.load("model.pth", map_location=torch.device("cpu"))
+model = torch.load("sustainability_model.pt", map_location=torch.device("cpu"))
 model.eval()
 
 # Load label -> score/fact map
