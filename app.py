@@ -1,66 +1,95 @@
+import torch
+import torch.nn as nn
+import torchvision.transforms as transforms
+import torchvision.models as models
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import torch
-import torchvision.transforms as transforms
 from PIL import Image
 import io
-import base64
 import json
+import base64
+import os
 
+# Load label map
+with open("sustainability_labels.json", "r") as f:
+    label_map = json.load(f)
+
+# Load user data
+if os.path.exists("user_data.json"):
+    with open("user_data.json", "r") as f:
+        user_data = json.load(f)
+else:
+    user_data = {}
+
+# Define model architecture
+class SustainabilityCNN(nn.Module):
+    def __init__(self, num_classes=6):
+        super(SustainabilityCNN, self).__init__()
+        self.model = models.resnet18(weights=None)
+        self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
+
+    def forward(self, x):
+        return self.model(x)
+
+# Initialize model and load weights
+model = SustainabilityCNN(num_classes=len(label_map))
+model.load_state_dict(torch.load("sustainability_model.pt", map_location=torch.device("cpu")))
+model.eval()
+
+# Define transforms
+transform = transforms.Compose([
+    transforms.Resize((224, 224)),
+    transforms.ToTensor(),
+])
+
+# Define Flask app
 app = Flask(__name__)
 CORS(app)
 
-# Load model
-model = torch.load("sustainability_model.pt", map_location=torch.device("cpu"))
-model.eval()
-
-# Load label -> score/fact map
-with open("sustainability_labels.json") as f:
-    label_map = json.load(f)
-
-@app.route("/")
+@app.route('/')
 def home():
-    return "🌱 Sustainability Scanner API is live!"
+    return "Sustainability Scanner API is live"
 
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
-    data = request.get_json()
-    username = data.get("username")
-    image_data = data.get("image")
-
-    if not username or not image_data:
-        return jsonify({"error": "Missing username or image"}), 400
-
     try:
-        # Decode base64 image
-        image_bytes = base64.b64decode(image_data)
+        data = request.get_json()
+        username = data["username"]
+        image_b64 = data["image"]
+
+        # Decode image
+        image_bytes = base64.b64decode(image_b64)
         image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+        image = transform(image).unsqueeze(0)
 
-        # Transform image (same as during training)
-        transform = transforms.Compose([
-            transforms.Resize((224, 224)),
-            transforms.ToTensor()
-        ])
-        image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
-
-        # Predict
+        # Make prediction
         with torch.no_grad():
-            outputs = model(image_tensor)
-            predicted_class = torch.argmax(outputs, dim=1).item()
+            outputs = model(image)
+            _, predicted = torch.max(outputs, 1)
+            predicted_label = str(predicted.item())
 
-        label_info = label_map.get(str(predicted_class), {
-            "fact": "Unknown prediction",
-            "score": 0
-        })
+        label = label_map.get(predicted_label, "Unknown")
+        score = 100 if "green" in label.lower() or "recyclable" in label.lower() else 45
+
+        fact = f"This looks like a {label}!"
+        message = f"Success for user {username}"
+
+        # Update user score
+        if username not in user_data:
+            user_data[username] = []
+        user_data[username].append({"label": label, "score": score})
+
+        with open("user_data.json", "w") as f:
+            json.dump(user_data, f)
 
         return jsonify({
-            "message": f"Success for user {username}",
-            "score": label_info["score"],
-            "fact": label_info["fact"]
+            "message": message,
+            "score": score,
+            "fact": fact
         })
 
     except Exception as e:
-        return jsonify({"error": f"Failed to process image: {str(e)}"}), 500
+        return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
