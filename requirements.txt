@@ -1,5 +1,5 @@
 Flask==2.3.2
 gunicorn==21.2.0
-torch==2.5.1
+torch==2.7.1
 torchvision==0.22.1
 Pillow
