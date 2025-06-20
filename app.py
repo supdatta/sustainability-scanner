@@ -1,71 +1,44 @@
 from flask import Flask, request, jsonify
-from PIL import Image
 import base64
-import io
-import json
-import os
-from predict_image import predict_image
+import logging
 
 app = Flask(__name__)
+logging.basicConfig(level=logging.DEBUG)
 
-with open("sustainability_labels.json") as f:
-    material_data = json.load(f)
-
-if not os.path.exists("user_data.json"):
-    with open("user_data.json", "w") as f:
-        json.dump({}, f)
-
-@app.route("/")
+@app.route('/')
 def home():
-    return "Sustainability Scanner API is live"
+    return "API is live"
 
-@app.route("/predict", methods=["POST"])
+@app.route('/predict', methods=['POST'])
 def predict():
-    body = request.json
-    image_b64 = body.get("image")
-    username = body.get("username")
-
-    if not image_b64 or not username:
-        return jsonify({"error": "Missing image or username"}), 400
-
     try:
-        img_bytes = base64.b64decode(image_b64)
-        label = predict_image(img_bytes)
-        info = material_data.get(label, {
-            "score": 5,
-            "fact": "No sustainability info available."
-        })
+        data = request.get_json()
+        app.logger.debug(f"Received data: {data}")
 
-        with open("user_data.json") as f:
-            users = json.load(f)
+        # Validate input
+        if not data:
+            return jsonify({"error": "Missing JSON body"}), 400
 
-        user = users.get(username, {"total_score": 0, "scans": []})
-        user["total_score"] += info["score"]
-        user["scans"].append({"item": label, "score": info["score"]})
-        users[username] = user
+        username = data.get("username")
+        image_data = data.get("image")
 
-        with open("user_data.json", "w") as f:
-            json.dump(users, f, indent=2)
+        if not username or not image_data:
+            return jsonify({"error": "Both 'username' and 'image' are required"}), 400
 
+        # Decode the image to verify it's valid base64
+        try:
+            decoded_image = base64.b64decode(image_data)
+            # You can now optionally save or process it
+        except Exception as e:
+            return jsonify({"error": f"Invalid base64 image data: {str(e)}"}), 400
+
+        # Dummy result
         return jsonify({
-            "item": label,
-            "score": info["score"],
-            "fact": info["fact"],
-            "total_score": user["total_score"]
+            "username": username,
+            "score": 91,
+            "fact": "This looks like a sustainable environment!"
         })
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-@app.route("/profile/<username>", methods=["GET"])
-def profile(username):
-    with open("user_data.json") as f:
-        users = json.load(f)
-
-    if username not in users:
-        return jsonify({"error": "User not found"}), 404
-
-    return jsonify(users[username])
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        app.logger.error(f"Exception occurred: {str(e)}")
+        return jsonify({"error": f"Internal server error: {str(e)}"}), 500
