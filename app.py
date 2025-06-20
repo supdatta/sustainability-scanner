@@ -12,7 +12,7 @@ app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
 # Load model
-with open("sustainability_model.pkl", "rb") as f:
+with open("sustainability_model.pt", "rb") as f:
     model = pickle.load(f)
 
 # Load label descriptions
