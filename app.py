@@ -31,11 +31,11 @@ class SustainabilityCNN(nn.Module):
 # Load model and weights
 try:
     model = SustainabilityCNN(num_classes=len(class_labels))
-    state_dict = torch.load("sustainability_model.pt", map_location=torch.device('cpu'))
-    model.load_state_dict(state_dict)
+    checkpoint = torch.load("sustainability_model.pt", map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint['model_state_dict'])
     model.eval()
 except Exception as e:
-    print(f"❌ Error loading model: {e}")
+    print(f" Error loading model: {e}")
     model = None
 
 # Define image transform
@@ -46,7 +46,7 @@ transform = transforms.Compose([
 
 @app.route('/')
 def home():
-    return "✅ Sustainability Scanner API is running!"
+    return "Sustainability Scanner API is running!"
 
 @app.route('/predict', methods=['POST'])
 def predict():
