@@ -1,95 +1,80 @@
-import torch
-import torch.nn as nn
-import torchvision.transforms as transforms
-import torchvision.models as models
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+import torch
+import torch.nn as nn
+from torchvision import transforms
 from PIL import Image
 import io
 import json
-import base64
-import os
 
-# Load label map
+app = Flask(__name__)
+CORS(app)
+
+# Load label-to-score-and-fact mapping
 with open("sustainability_labels.json", "r") as f:
-    label_map = json.load(f)
+    label_data = json.load(f)
 
-# Load user data
-if os.path.exists("user_data.json"):
-    with open("user_data.json", "r") as f:
-        user_data = json.load(f)
-else:
-    user_data = {}
+# Define your model architecture (ResNet18-based)
+from torchvision.models import resnet18
 
-# Define model architecture
 class SustainabilityCNN(nn.Module):
-    def __init__(self, num_classes=6):
+    def __init__(self, num_classes=3):
         super(SustainabilityCNN, self).__init__()
-        self.model = models.resnet18(weights=None)
+        self.model = resnet18(weights=None)
         self.model.fc = nn.Linear(self.model.fc.in_features, num_classes)
 
     def forward(self, x):
         return self.model(x)
 
-# Initialize model and load weights
-model = SustainabilityCNN(num_classes=len(label_map))
-model.load_state_dict(torch.load("sustainability_model.pt", map_location=torch.device("cpu")))
+# Load model
+model = SustainabilityCNN(num_classes=len(label_data))
+checkpoint = torch.load("sustainability_model.pt", map_location=torch.device("cpu"))
+model.load_state_dict(checkpoint["model_state_dict"])
 model.eval()
 
-# Define transforms
+# Define image transform (must match training)
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor(),
 ])
 
-# Define Flask app
-app = Flask(__name__)
-CORS(app)
-
 @app.route('/')
 def home():
-    return "Sustainability Scanner API is live"
+    return jsonify({"message": "Sustainability API is live!"})
 
 @app.route('/predict', methods=['POST'])
 def predict():
+    if "image" not in request.files or "username" not in request.form:
+        return jsonify({"error": "Missing image or username"}), 400
+
+    image_file = request.files["image"]
+    username = request.form["username"]
+
     try:
-        data = request.get_json()
-        username = data["username"]
-        image_b64 = data["image"]
-
         # Decode image
-        image_bytes = base64.b64decode(image_b64)
-        image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-        image = transform(image).unsqueeze(0)
+        image = Image.open(image_file).convert("RGB")
+        image_tensor = transform(image).unsqueeze(0)  # Add batch dimension
 
-        # Make prediction
+        # Predict
         with torch.no_grad():
-            outputs = model(image)
-            _, predicted = torch.max(outputs, 1)
-            predicted_label = str(predicted.item())
+            outputs = model(image_tensor)
+            predicted_index = torch.argmax(outputs, dim=1).item()
 
-        label = label_map.get(predicted_label, "Unknown")
-        score = 100 if "green" in label.lower() or "recyclable" in label.lower() else 45
-
-        fact = f"This looks like a {label}!"
-        message = f"Success for user {username}"
-
-        # Update user score
-        if username not in user_data:
-            user_data[username] = []
-        user_data[username].append({"label": label, "score": score})
-
-        with open("user_data.json", "w") as f:
-            json.dump(user_data, f)
+        # Map to score and fact
+        class_name = list(label_data.keys())[predicted_index]
+        result = label_data[class_name]
+        score = result["score"]
+        fact = result["fact"]
 
         return jsonify({
-            "message": message,
+            "message": f"Success for user {username}",
             "score": score,
-            "fact": fact
+            "fact": fact,
+            "label": class_name
         })
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+    app.run(debug=True)
