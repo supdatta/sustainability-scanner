@@ -1,0 +1,26 @@
+{
+  "can": {
+    "score": 8,
+    "fact": "Aluminum cans are 100% recyclable and can be reused forever!"
+  },
+  "glass": {
+    "score": 9,
+    "fact": "Glass is endlessly recyclable without losing quality."
+  },
+  "paper": {
+    "score": 10,
+    "fact": "Paper is biodegradable and easy to recycle — go green!"
+  },
+  "plastic": {
+    "score": 4,
+    "fact": "Plastic takes hundreds of years to break down and pollutes oceans."
+  },
+  "plastic_bag": {
+    "score": 2,
+    "fact": "Plastic bags are hard to recycle and often harm wildlife."
+  },
+  "styrofoam": {
+    "score": 1,
+    "fact": "Styrofoam is not biodegradable and is very harmful to the environment."
+  }
+}

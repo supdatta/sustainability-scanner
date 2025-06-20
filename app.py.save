@@ -1,0 +1,75 @@
+from flask import Flask, request, jsonify
+from PIL import Image
+import base64
+import io
+import json
+import os
+
+from predict_image import predict_image  # Import the classifier function
+
+app = Flask(__name__)
+
+# Load material → score & fact
+with open("sustainability_labels.json", "r") as f:
+    material_data = json.load(f)
+
+# Ensure user database exists
+if not os.path.exists("user_data.json"):
+    with open("user_data.json", "w") as f:
+        json.dump({}, f)
+
+@app.route("/")
+def home():
+    return "✅ Sustainability Scanner API is running!"
+
+@app.route("/predict", methods=["POST"])
+def predict():
+    data = request.json
+    image_b64 = data.get("image")
+    username = data.get("username")
+
+    if not image_b64 or not username:
+        return jsonify({"error": "Missing image or username"}), 400
+
+    try:
+        image_bytes = base64.b64decode(image_b64)
+        label = predict_image(image_bytes)
+
+        item_info = material_data.get(label, {
+            "score": 5,
+            "fact": "No sustainability data found for this item."
+        })
+
+        # Load user data
+        with open("user_data.json", "r") as f:
+            users = json.load(f)
+
+        user = users.get(username, {"total_score": 0, "scans": []})
+        user["total_score"] += item_info["score"]
+        user["scans"].append({"item": label, "score": item_info["score"]})
+        users[username] = user
+
+        # Save updated user data
+        with open("user_data.json", "w") as f:
+            json.dump(users, f, indent=2)
+
+        return jsonify({
+            "item": label,
+            "score": item_info["score"],
+            "fact": item_info["fact"],
+            "total_score": user["total_score"]
+        })
+
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/profile/<username>", methods=["GET"])
+def profile(username):
+    with open("user_data.json", "r") as f:
+        users = json.load(f)
+
+    if username not in users:
+        return jsonify({"error": "User not found"}), 404
+
+    return jsonify(users[username])
+

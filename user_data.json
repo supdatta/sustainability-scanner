@@ -1,0 +1,11 @@
+{
+  "test_user": {
+    "total_score": 4,
+    "scans": [
+      {
+        "item": "plastic",
+        "score": 4
+      }
+    ]
+  }
+}
