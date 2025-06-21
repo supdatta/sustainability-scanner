@@ -33,7 +33,7 @@ transform = transforms.Compose([
     transforms.ToTensor()
 ])
 
-dataset = ImageFolder(root='dataset/train', transform=transform)
+dataset = ImageFolder(root='dataset/recyclable_materials', transform=transform)
 loader = DataLoader(dataset, batch_size=64, shuffle=True)
 
 num_classes = len(dataset.classes)

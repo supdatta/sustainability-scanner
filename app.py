@@ -1,75 +1,59 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
 from torchvision import transforms
 from PIL import Image
 import json
-
-class SustainabilityCNN(nn.Module):
-    def __init__(self, num_classes):
-        super(SustainabilityCNN, self).__init__()
-        self.conv1 = nn.Conv2d(3, 32, 3, 1)
-        self.conv2 = nn.Conv2d(32, 64, 3, 1)
-        self.dropout1 = nn.Dropout(0.25)
-        self.dropout2 = nn.Dropout(0.5)
-        self.fc1 = nn.Linear(64 * 6 * 6, 128)
-        self.fc2 = nn.Linear(128, num_classes)
-
-    def forward(self, x):
-        x = F.relu(self.conv1(x))
-        x = F.max_pool2d(F.relu(self.conv2(x)), 2)
-        x = self.dropout1(x)
-        x = torch.flatten(x, 1)
-        x = F.relu(self.fc1(x))
-        x = self.dropout2(x)
-        x = self.fc2(x)
-        return x
+import io
+from model import SustainabilityCNN
 
 app = Flask(__name__)
-device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+CORS(app)
 
 try:
-    with open('sustainability_labels.json', 'r') as f:
+    with open("sustainability_labels.json", "r") as f:
         label_facts = json.load(f)
+
     num_classes = len(label_facts)
-    model = SustainabilityCNN(num_classes)
-    model.to(device)
-    checkpoint = torch.load('sustainability_model.pt', map_location=device)
-    model.load_state_dict(checkpoint['model_state_dict'])
+    model = SustainabilityCNN(num_classes=num_classes)
+    model.load_state_dict(torch.load("sustainability_model.pt", map_location=torch.device("cpu")))
     model.eval()
-    idx_to_class = {v: k for k, v in checkpoint['class_to_idx'].items()}
-    model_loaded = True
+    class_names = list(label_facts.keys())
 except Exception as e:
-    model_loaded = False
+    print("Error loading model:", e)
     model = None
-    load_error = str(e)
 
 transform = transforms.Compose([
-    transforms.Resize((32, 32)),
+    transforms.Resize((224, 224)),
     transforms.ToTensor()
 ])
 
 @app.route('/')
 def home():
-    return "API is live"
+    return "Sustainability Scanner API is running"
 
 @app.route('/predict', methods=['POST'])
 def predict():
-    if not model_loaded:
-        return jsonify({'error': 'Model not loaded', 'details': load_error}), 500
+    if model is None:
+        return jsonify({'error': 'Model not loaded'}), 500
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
 
-    image = Image.open(request.files['image']).convert('RGB')
-    image = transform(image).unsqueeze(0).to(device)
+    image_file = request.files['image']
+    image_bytes = image_file.read()
+    image = Image.open(io.BytesIO(image_bytes)).convert('RGB')
+    input_tensor = transform(image).unsqueeze(0)
+
     with torch.no_grad():
-        output = model(image)
-        predicted = torch.argmax(output, 1).item()
-        label = idx_to_class[predicted]
-        fact = label_facts.get(label, "No fact available.")
+        outputs = model(input_tensor)
+        _, predicted = torch.max(outputs, 1)
+        label = class_names[predicted.item()]
+        fact = label_facts[label]
+
     return jsonify({
         'label': label,
-        'score': predicted,
         'fact': fact
     })
+
+if __name__ == '__main__':
+    app.run()

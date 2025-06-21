@@ -1,26 +1,29 @@
 {
-  "can": {
-    "score": 8,
-    "fact": "Aluminum cans are 100% recyclable and can be reused forever!"
-  },
-  "glass": {
-    "score": 9,
-    "fact": "Glass is endlessly recyclable without losing quality."
-  },
-  "paper": {
-    "score": 10,
-    "fact": "Paper is biodegradable and easy to recycle — go green!"
-  },
-  "plastic": {
-    "score": 4,
-    "fact": "Plastic takes hundreds of years to break down and pollutes oceans."
-  },
-  "plastic_bag": {
-    "score": 2,
-    "fact": "Plastic bags are hard to recycle and often harm wildlife."
-  },
-  "styrofoam": {
-    "score": 1,
-    "fact": "Styrofoam is not biodegradable and is very harmful to the environment."
-  }
+  "Plastic water bottles": "Plastic water bottles are recyclable and should be rinsed before disposal.",
+  "Plastic soda bottles": "Plastic soda bottles are PET plastic and can be recycled curbside.",
+  "Plastic detergent bottles": "Detergent bottles are made of HDPE plastic and should be recycled with caps on.",
+  "Plastic shopping bags": "Plastic shopping bags can be recycled at grocery store drop-offs, not in curbside bins.",
+  "Plastic trash bags": "Trash bags are not typically recyclable and should be used to contain waste.",
+  "Plastic food containers": "Rigid plastic food containers are recyclable after cleaning.",
+  "Plastic disposable cutlery": "Plastic cutlery is generally not recyclable; avoid single-use if possible.",
+  "Plastic straws": "Plastic straws are not recyclable and pose a threat to marine life.",
+  "Plastic cup lids": "Cup lids may be recyclable depending on the type of plastic; check local guidelines.",
+  "Paper newspaper": "Newspapers are fully recyclable and should be placed in paper recycling.",
+  "Paper office paper": "White office paper is high-quality recyclable material.",
+  "Paper magazines": "Magazines are recyclable, but remove plastic wraps before discarding.",
+  "Paper cardboard boxes": "Cardboard boxes are widely recyclable; flatten before recycling.",
+  "Paper cardboard packaging": "Cardboard packaging is recyclable, even if printed, if not soiled.",
+  "Glass beverage bottles": "Glass beverage bottles are recyclable indefinitely if not broken.",
+  "Glass food jars": "Glass food jars are recyclable after rinsing out food residues.",
+  "Glass cosmetic containers": "Cosmetic glass containers are recyclable if clean and lid is removed.",
+  "Metal aluminum soda cans": "Aluminum soda cans are highly recyclable and should be rinsed before disposal.",
+  "Metal aluminum food cans": "Aluminum food cans are recyclable and energy-efficient to reclaim.",
+  "Metal steel food cans": "Steel food cans are recyclable and should be rinsed out first.",
+  "Metal aerosol cans": "Empty aerosol cans are recyclable; do not crush or puncture.",
+  "Organic food waste": "Food waste can be composted rather than sent to landfills.",
+  "Organic eggshells": "Eggshells enrich compost and are biodegradable.",
+  "Organic coffee grounds": "Coffee grounds are compostable and enrich soil.",
+  "Organic tea bags": "Tea bags are compostable unless made with synthetic materials.",
+  "Textiles clothing": "Clothing can be donated or repurposed; not suitable for recycling bins.",
+  "Textiles shoes": "Shoes can be repurposed or donated; not curbside recyclable."
 }
