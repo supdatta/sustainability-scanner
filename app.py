@@ -10,6 +10,7 @@ from model import SustainabilityCNN
 app = Flask(__name__)
 CORS(app)
 
+# Load label facts
 try:
     with open("sustainability_labels.json", "r") as f:
         label_facts = json.load(f)
@@ -19,10 +20,12 @@ try:
     model.load_state_dict(torch.load("sustainability_model.pt", map_location=torch.device("cpu")))
     model.eval()
     class_names = list(label_facts.keys())
+
 except Exception as e:
     print("Error loading model:", e)
     model = None
 
+# Define image transform (match to training config)
 transform = transforms.Compose([
     transforms.Resize((224, 224)),
     transforms.ToTensor()
@@ -36,6 +39,7 @@ def home():
 def predict():
     if model is None:
         return jsonify({'error': 'Model not loaded'}), 500
+
     if 'image' not in request.files:
         return jsonify({'error': 'No image uploaded'}), 400
 
