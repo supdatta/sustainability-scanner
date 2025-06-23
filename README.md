@@ -87,7 +87,7 @@ Edit
   "fact": "This item decomposes naturally and safely."
 }
 
-##🌍 Deployment (Railway)
+###🌍 Deployment (Railway)
 Create new project at https://railway.app
 
 Link GitHub repo
@@ -100,15 +100,16 @@ Set start command:
 gunicorn app:app
 Add runtime.txt → python-3.10.12
 
-##📬 API Endpoints
+###📬 API Endpoints
 GET /
 Returns: "API is live"
 
-## POST /predict
+
+### POST /predict
 Accepts: multipart/form-data image
 Returns: Sustainability prediction, score, and fact
 
-##🧠 Model Overview
+###🧠 Model Overview
 CNN trained on custom image dataset containing:
 
 Organic Waste
@@ -122,7 +123,7 @@ Hazardous
 Biodegradable
 Other
 
-##🎯 Use Cases
+###🎯 Use Cases
 Mobile sustainability scanner apps
 
 Waste classification systems
@@ -131,12 +132,12 @@ Educational environmental tools
 
 Hackathons and AI demos
 
-##⚠️ Notes
+###⚠️ Notes
 Dataset not included in repo (add it manually)
 
 Model must be trained with train_model.py
 
 Ensure sustainability_model.pt exists before running app.py
 
-##📄 License
+###©️ License
 This project is developed for educational and hackathon purposes by Saptangshu Datta.
