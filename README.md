@@ -109,7 +109,8 @@ Returns: "API is live"
 Accepts: multipart/form-data image
 Returns: Sustainability prediction, score, and fact
 
-###🧠 Model Overview
+Model Overview
+```
 CNN trained on custom image dataset containing:
 
 Organic Waste
@@ -122,8 +123,9 @@ Glass
 Hazardous
 Biodegradable
 Other
+```
 
-###🎯 Use Cases
+🎯 Use Cases
 Mobile sustainability scanner apps
 
 Waste classification systems
@@ -132,7 +134,8 @@ Educational environmental tools
 
 Hackathons and AI demos
 
-###⚠️ Notes
+
+⚠️ Notes
 Dataset not included in repo (add it manually)
 
 Model must be trained with train_model.py
