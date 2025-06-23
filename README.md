@@ -39,7 +39,7 @@ This creates `sustainability_model.pt` used by the API.
 
 Start the API:
 ```bash
-python app.py
+python3 app.py
 ```
 
 Visit [http://localhost:5000](http://localhost:5000) to check if it’s live.
@@ -126,7 +126,7 @@ CNN trained on a custom image dataset containing:
 ---
 
 ## ⚠️ Notes
-
+- Check for Validity at: https://web-production-34ac4.up.railway.app/
 - Dataset not included in repo (add it manually)  
 - Model must be trained using `train_model.py`  
 - Ensure `sustainability_model.pt` exists before running `app.py`
