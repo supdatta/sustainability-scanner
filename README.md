@@ -1,146 +1,138 @@
-# ♻️ Sustainability Image Classifier API
+# Sustainability API 🚮🔍
 
-A Flask-based backend that classifies images into sustainable categories using a CNN model. This API powers mobile or web apps that need real-time sustainability scoring from images.
-
----
-
-## 📦 Features
-
-- 🔍 Predicts sustainability category from uploaded image
-- 🧠 Uses custom-trained CNN (`sustainability_model.pt`)
-- 📤 POST endpoint for prediction
-- 🔐 Stores category-wise sustainability facts
-- 🗃️ Tracks user scores in JSON
+A simple image classification API for sustainability analysis powered by a custom-trained CNN.
 
 ---
 
-## 🛠️ Tech Stack
-
-- **Backend**: Flask + Gunicorn
-- **ML Framework**: PyTorch
-- **Deployment**: Render / Railway (cloud-hosted)
-- **Language**: Python 3.10.12
-- **Data Storage**: JSON files
-
----
-
-## 🗂️ Project Structure
-```
-├── dataset/ # Training images (not uploaded)
-├── sustainability_model.pt # Trained PyTorch model
-├── sustainability_labels.json # Label → Fact mapping
-├── user_data.json # Stores scanned user scores
-├── train_model.py # Model training script
-├── predict_image.py # Predict single image
-├── app.py # Flask API entry point
-├── test_predict.py # Test client for /predict
-├── model.py # CNN model class
-├── requirements.txt # Dependencies
-├── runtime.txt # Python version for Render
-├── render.yaml # Render deploy config
-├── .gitignore # Ignore datasets, temp files
-```
----
-
-##  Getting Started
+## 🚀 Getting Started
 
 ### 🧾 Prerequisites
-
 - Python 3.10+
-- `pip`, `virtualenv` or Conda
-- `archive.zip` (your dataset) unzipped to `/dataset`
+- `pip`, `virtualenv`, or Conda
+- `archive.zip` (your dataset) unzipped into the `/dataset` folder
 
 ---
 
-###  Installation
+### 📦 Installation
 
-```
+```bash
 git clone https://github.com/supdatta/sustainability_api.git
 cd sustainability_api
 python3 -m venv env
 source env/bin/activate
 pip install -r requirements.txt
-
 ```
-### Train the Model
+
+---
+
+## 🧠 Train the Model
+
+```bash
 python3 train_model.py
-This creates sustainability_model.pt used by the API.
+```
 
-### 🔬 Test Locally
+This creates `sustainability_model.pt` used by the API.
+
+---
+
+## 🧪 Test Locally
+
+Start the API:
+```bash
 python app.py
-Open http://localhost:5000 to see API is live.
+```
 
+Visit [http://localhost:5000](http://localhost:5000) to check if it’s live.
 
-Use test_predict.py to test predictions.
+Use `test_predict.py` to test predictions.
 
-### Sample Prediction
-curl -X POST http://localhost:5000/predict \
--F "file=@test.jpg"
-Response:
+---
 
-json
-Copy
-Edit
+### 📤 Sample Prediction
+
+```bash
+curl -X POST http://localhost:5000/predict -F "file=@test.jpg"
+```
+
+Sample Response:
+```json
 {
   "prediction": "Biodegradable Waste",
   "score": 8,
   "fact": "This item decomposes naturally and safely."
 }
-
-###🌍 Deployment (Railway)
-Create new project at https://railway.app
-
-Link GitHub repo
-
-Ensure render.yaml or Railway equivalent config is present
-
-Set build command:
-pip install -r requirements.txt
-Set start command:
-gunicorn app:app
-Add runtime.txt → python-3.10.12
-
-###📬 API Endpoints
-GET /
-Returns: "API is live"
-
-
-### POST /predict
-Accepts: multipart/form-data image
-Returns: Sustainability prediction, score, and fact
-
-Model Overview
-```
-CNN trained on custom image dataset containing:
-
-Organic Waste
-E-waste
-Plastic
-Metal
-Paper
-Non-Recyclable
-Glass
-Hazardous
-Biodegradable
-Other
 ```
 
-🎯 Use Cases
-Mobile sustainability scanner apps
+---
 
-Waste classification systems
+## 🌍 Deployment (Railway)
 
-Educational environmental tools
+1. Create a new project at [https://railway.app](https://railway.app)
+2. Link this GitHub repository
+3. Ensure `render.yaml` or equivalent config is present
+4. Set build command:
 
-Hackathons and AI demos
+   ```bash
+   pip install -r requirements.txt
+   ```
 
+5. Set start command:
 
-⚠️ Notes
-Dataset not included in repo (add it manually)
+   ```bash
+   gunicorn app:app
+   ```
 
-Model must be trained with train_model.py
+6. Add `runtime.txt` with content:
 
-Ensure sustainability_model.pt exists before running app.py
+   ```
+   python-3.10.12
+   ```
 
-###©️ License
-This project is developed for educational and hackathon purposes by Saptangshu Datta.
+---
+
+## 📬 API Endpoints
+
+| Method | Endpoint      | Description                          |
+|--------|---------------|--------------------------------------|
+| GET    | `/`           | Returns `"API is live"`              |
+| POST   | `/predict`    | Returns prediction, score, and fact  |
+
+---
+
+## 🧾 Model Overview
+
+CNN trained on a custom image dataset containing:
+
+- Organic Waste  
+- E-waste  
+- Plastic  
+- Metal  
+- Paper  
+- Non-Recyclable  
+- Glass  
+- Hazardous  
+- Biodegradable  
+- Other
+
+---
+
+## 🎯 Use Cases
+
+- Mobile sustainability scanner apps  
+- Waste classification systems  
+- Educational environmental tools  
+- Hackathons and AI demos  
+
+---
+
+## ⚠️ Notes
+
+- Dataset not included in repo (add it manually)  
+- Model must be trained using `train_model.py`  
+- Ensure `sustainability_model.pt` exists before running `app.py`
+
+---
+
+## ©️ License
+
+This project is developed for **educational and hackathon purposes** by **Saptangshu Datta**.
